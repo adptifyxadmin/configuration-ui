@@ -1,0 +1,1 @@
+import { Establishment } from "../../establishment/Establishment.Type";
