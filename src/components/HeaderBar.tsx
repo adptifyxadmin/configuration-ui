@@ -3,10 +3,6 @@ import { Link } from "react-router-dom";
 import BuildIcon from "@mui/icons-material/Build";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 
-// Retrieve URLs from environment variables
-const APP_MAIN_UI_URL = process.env.REACT_APP_MAIN_UI_URL || "https://gray-dune-0f3035600.4.azurestaticapps.net/";
-const SETTINGS_URL = process.env.REACT_APP_SETTINGS_UI_URL || "https://happy-bay-05cf1b400.4.azurestaticapps.net/";
-
 const HeaderBar = () => (
     <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar>
@@ -14,8 +10,7 @@ const HeaderBar = () => (
              <Typography
               variant="h6"
               noWrap
-              component={Link}
-              to={APP_MAIN_UI_URL}
+              onClick={() => window.location.href = "/home-ui/"}
               sx={{
                 textDecoration: "none",
                 color: "inherit",
@@ -35,8 +30,7 @@ const HeaderBar = () => (
             <Box sx={{ display: "flex", gap: 7 }}>            
                 <Typography
                     variant="body1"
-                    component={Link}
-                    to={SETTINGS_URL}
+                    onClick={() => window.location.href = "/settings-ui/"}
                     sx={{
                         textDecoration: "none", 
                         color: "inherit",
