@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = 'https://app.adptifyx.com/configuration-service/api/config'
+const API_URL = 'https://app.adptifyx.com/configuration-service/api/config';
 
 const apiClient = axios.create({
   baseURL: API_URL,
