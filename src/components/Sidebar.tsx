@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useState, useEffect, useMemo } from "react";
 import {
     List,
     ListItem,
@@ -13,23 +13,37 @@ import {
     Close,
 } from "../shared/utils/muiImports";
 import { SidebarMenuProps } from "./types/Sidebar.types";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const Sidebar: React.FC<SidebarMenuProps> = ({ menuItems }) => {
-    // Initialize all categories to be expanded by default
+    const location = useLocation();
+
     const [openCategories, setOpenCategories] = useState<{ [key: string]: boolean }>(
         menuItems.reduce<{ [key: string]: boolean }>((acc, { category }) => {
-            acc[category] = true; // Set each category to true (expanded) by default
+            acc[category] = true;
             return acc;
-        }, {}) // Type the accumulator as { [key: string]: boolean }
+        }, {})
     );
+
     const [searchTerm, setSearchTerm] = useState<string>("");
 
-    // Toggles the state of the clicked category
+    // Expand categories based on search term
+    useEffect(() => {
+        if (searchTerm) {
+            const expanded = menuItems.reduce<{ [key: string]: boolean }>((acc, { category, items }) => {
+                acc[category] = items.some(({ text }) =>
+                    text.toLowerCase().includes(searchTerm)
+                );
+                return acc;
+            }, {});
+            setOpenCategories(expanded);
+        }
+    }, [searchTerm, menuItems]);
+
     const handleClick = (category: string) => {
         setOpenCategories((prev) => ({
             ...prev,
-            [category]: !prev[category],  // Toggle the category's open state
+            [category]: !prev[category],
         }));
     };
 
@@ -37,31 +51,30 @@ const Sidebar: React.FC<SidebarMenuProps> = ({ menuItems }) => {
         setSearchTerm(e.target.value.toLowerCase());
     };
 
-    // Filter the menu items based on the search term
-    const filteredMenuItems = menuItems
-        .map(({ category, icon: Icon, items }) => {
-            const filteredItems = items.filter(({ text }) =>
-                text.toLowerCase().includes(searchTerm)
-            );
-            return {
-                category,
-                icon: Icon,
-                items: filteredItems,
-            };
-        })
-        .filter(({ items }) => items.length > 0 || searchTerm === "");
-
-    // Clear the search term
     const handleClearSearch = () => {
         setSearchTerm("");
     };
 
+    const filteredMenuItems = useMemo(() => {
+        return menuItems
+            .map(({ category, icon: Icon, items }) => {
+                const filteredItems = items.filter(({ text }) =>
+                    text.toLowerCase().includes(searchTerm)
+                );
+                return { category, icon: Icon, items: filteredItems };
+            })
+            .filter(({ items }) => items.length > 0 || searchTerm === "");
+    }, [menuItems, searchTerm]);
+
+    const isActive = (path: string) => location.pathname === path;
+
     return (
-        <>
+        <div style={{ maxHeight: "calc(100vh - 80px)", overflowY: "auto", paddingRight: 8 }}>
             <TextField
                 label="Search Menu"
                 variant="outlined"
                 fullWidth
+                size="small"
                 margin="dense"
                 value={searchTerm}
                 onChange={handleSearchChange}
@@ -69,59 +82,77 @@ const Sidebar: React.FC<SidebarMenuProps> = ({ menuItems }) => {
                     endAdornment: (
                         <InputAdornment position="end">
                             {searchTerm && (
-                                <IconButton onClick={handleClearSearch} edge="end">
-                                    <Close />
+                                <IconButton onClick={handleClearSearch} edge="end" size="small">
+                                    <Close fontSize="small" />
                                 </IconButton>
                             )}
                         </InputAdornment>
                     ),
                 }}
+                sx={{ mb: 1 }}
             />
-            <List>
+
+            <List disablePadding>
                 {filteredMenuItems.map(({ category, icon: Icon, items }) => (
                     <Fragment key={category}>
                         <ListItem
                             button
-                            onClick={() => handleClick(category)}  // Toggle the clicked category
+                            onClick={() => handleClick(category)}
                             sx={{
-                                "& .MuiListItemText-primary": {
-                                    fontWeight: "bold",
-                                    fontSize: "0.850rem",
+                                bgcolor: "background.paper",
+                                py: 1,
+                                px: 2,
+                                "&:hover": {
+                                    bgcolor: "action.hover",
                                 },
                             }}
                         >
-                            {Icon && <Icon sx={{ mr: 2 }} />}
-                            <ListItemText primary={category} />
+                            {Icon && <Icon sx={{ mr: 2, color: "primary.main" }} />}
+                            <ListItemText
+                                primary={category}
+                                primaryTypographyProps={{
+                                    fontWeight: "bold",
+                                    fontSize: "0.90rem",
+                                    color: "text.primary",
+                                }}
+                            />
                             {openCategories[category] ? <ExpandLess /> : <ExpandMore />}
                         </ListItem>
-                        <Collapse
-                            in={openCategories[category] || false}  // Ensure the category is collapsed by default if undefined
-                            timeout="auto"
-                            unmountOnExit
-                        >
+
+                        <Collapse in={openCategories[category]} timeout="auto" unmountOnExit>
                             <List component="div" disablePadding>
                                 {items.map(({ text, to }) => (
                                     <ListItem
                                         button
                                         component={Link}
                                         to={to}
-                                        key={text}
+                                        key={`${category}-${text}`}
                                         sx={{
-                                            "& .MuiListItemText-primary": {
-                                                fontSize: "0.850rem",
+                                            pl: 5,
+                                            py: 1,
+                                            bgcolor: isActive(to) ? "action.selected" : "inherit",
+                                            "&:hover": {
+                                                bgcolor: "action.hover",
                                             },
                                         }}
                                     >
-                                        <ListItemText primary={text} sx={{ pl: 4 }} />
+                                        <ListItemText
+                                            primary={text}
+                                            primaryTypographyProps={{
+                                                fontSize: "0.85rem",
+                                                color: isActive(to) ? "primary.main" : "text.secondary",
+                                                fontWeight: isActive(to) ? "bold" : "normal",
+                                            }}
+                                        />
                                     </ListItem>
                                 ))}
                             </List>
                         </Collapse>
-                        <Divider sx={{ my: 2 }} />
+                        <Divider sx={{ my: 1 }} />
                     </Fragment>
                 ))}
             </List>
-        </>
+        </div>
     );
 };
 

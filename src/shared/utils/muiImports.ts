@@ -1,5 +1,9 @@
+import Tooltip from "@mui/material/Tooltip";
+import Menu from "@mui/material/Menu";
 export {
     Button,
+    Tooltip,
+    Menu,
     MenuItem,
     TextField,
     Dialog,

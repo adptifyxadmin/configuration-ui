@@ -6,18 +6,24 @@ const Content: React.FC = () => {
   return (
     <Box
       component="main"
-      sx={{
+      sx={(theme) => ({
         flexGrow: 1,
-        bgcolor: (theme) => theme.palette.background.default,
-        padding: 3,
-        marginTop: 8, // Add margin-top to avoid overlap with AppBar
-      }}
+        bgcolor: theme.palette.background.default,
+        padding: theme.spacing(3),
+        mt: theme.spacing(8), // replaces marginTop: 8 for better theme consistency
+        minHeight: "100vh", // ensures full height coverage
+      })}
     >
       <Container fluid>
         <Row>
-          <Col md={9}>
+          <Col xs={12} md={9}>
             <Outlet />
           </Col>
+
+          {/* Optional Side Panel */}
+          {/* <Col md={3} className="d-none d-md-block">
+            <YourSidePanelComponent />
+          </Col> */}
         </Row>
       </Container>
     </Box>

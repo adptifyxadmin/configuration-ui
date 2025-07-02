@@ -60,8 +60,10 @@ const RoomPage: React.FC = () => {
     const [deleteId, setDeleteId] = useState(0);
 
     const handleCreateNewroom = () => {
+        console.log(878)
         setCurrentRoom(emptyRoom);
         manageAccordion(true);
+        emptyRoom.active = true;
     };
 
     const manageAccordion = (isExpanded: boolean) => {
@@ -154,6 +156,7 @@ const handleDelete = async () => {
 
     const handleAccordionChange =
         (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+            console.log("row clicked")
             if (panel === RoomListHeader) {
                 manageAccordion(false);
             }
